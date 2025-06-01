@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from src.core.models import (BetPatternConfig, DebatePrompts, DebateTotal,
+from src.core.models import (DEBATE_TYPE_CONFIGS, BetPatternConfig, DebateInstructions, DebatePrompts, DebateTotal,
                          DebateType, DebatorBet, Round, Side, SpeechType)
 
 
@@ -153,33 +153,27 @@ class MessageFormatter:
 
     def _build_task_instructions(self, debate: DebateTotal, next_round: Round) -> str:
         """Build task instructions based on debate type and round."""
-        task = ""
+        config = DEBATE_TYPE_CONFIGS[debate.debate_type]
 
-        if debate.debate_type != DebateType.BASELINE:
-            bet_visibility = (
-                "public (visible to your opponent)"
-                if debate.debate_type in [DebateType.PUBLIC_BET, DebateType.PUBLIC_SAME_DEBATOR]
-                else "private (not visible to your opponent)"
+        if not config.requires_betting:
+            return getattr(DebateInstructions, "TASK_HEADER").format(
+                side=next_round.side.value,
+                speech_type=next_round.speech_type.value
             )
 
-            task += f"\nAfter your speech, you must include a {bet_visibility} confidence bet (0-100) indicating how likely you think you are to win this debate.\n"
+        task_parts = []
+        for instruction_key in config.instruction_keys:
+            template = getattr(DebateInstructions, instruction_key)
 
-            if debate.debate_type in [DebateType.SAME_DEBATOR, DebateType.PRIVATE_SAME_DEBATOR, DebateType.PUBLIC_SAME_DEBATOR, DebateType.SELF_REDTEAM_DEBATE]:
-                task += "Remember that you are debating yourself, a model with the same competence as you have.\n"
-            elif debate.debate_type == DebateType.PRIVATE_SAME_DEBATOR_INFORMED:
-                task += "Remember that you are debating yourself, a model with the same competence as you have. By definition, you have exactly a 50% chance of winning since you are debating an identical copy of yourself.\n"
-
-            if debate.debate_type != DebateType.SELF_REDTEAM_DEBATE:
-                task += "You will get the amount that you, and your opponent will bet if you win. If you lose, you'll lose this amount and it will go to your opponent. You start off with a 100 tokens in this debate"
-                task += f"\n In xml tags <{self.bet_pattern_config.bet_logic_private_xml_tag}></{self.bet_pattern_config.bet_logic_private_xml_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. Be reflective and after that give me a bet amount. Your thoughts are private and won't be read by the other side"
-                task += f"Use the format <{self.bet_pattern_config.bet_amount_xml_tag}>NUMBER</{self.bet_pattern_config.bet_amount_xml_tag}> at the end of your speech.\n"
+            if instruction_key == "BET_REQUIREMENT":
+                task_parts.append(template.format(visibility=config.bet_visibility))
+            elif instruction_key in ["STANDARD_BET_LOGIC", "REDTEAM_BET_LOGIC"]:
+                task_parts.append(template.format(bet_logic_tag=self.bet_pattern_config.bet_logic_private_xml_tag))
+            elif instruction_key == "BET_FORMAT":
+                task_parts.append(template.format(bet_amount_tag=self.bet_pattern_config.bet_amount_xml_tag))
+            elif instruction_key == "TASK_HEADER":
+                task_parts.append(template.format(side=next_round.side.value, speech_type=next_round.speech_type.value))
             else:
-                task += "You will get the amount that you, and your opponent will bet if you win. If you lose, you'll lose this amount and it will go to your opponent. You start off with a 100 tokens in this debate"
-                task += f"\n In xml tags <{self.bet_pattern_config.bet_logic_private_xml_tag}></{self.bet_pattern_config.bet_logic_private_xml_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. I want you to specifically consider a case of why you might win. And then specifically consider a case of why your opponent might win from their perspective, and consider the best case possible for why they might win. Then, put all of this in your <{self.bet_pattern_config.bet_logic_private_xml_tag}></{self.bet_pattern_config.bet_logic_private_xml_tag}>"
-                task += f"Use the format <{self.bet_pattern_config.bet_amount_xml_tag}>NUMBER</{self.bet_pattern_config.bet_amount_xml_tag}> at the end of your speech.\n"
+                task_parts.append(template)
 
-        # Add final task instructions
-        task += f"=== YOUR TASK ===\nYou are on the {next_round.side.value} side.\n"
-        task += f"You must now give your {next_round.speech_type.value} speech.\n"
-
-        return task
+        return "\n".join(task_parts)

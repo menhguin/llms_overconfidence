@@ -34,6 +34,88 @@ class SpeechType(Enum):
     CLOSING = "closing"
 
 
+class DebateInstructions:
+    """Constants for debate instruction text templates."""
+
+    # Bet requirement instructions
+    BET_REQUIREMENT = "\nAfter your speech, you must include a {visibility} confidence bet (0-100) indicating how likely you think you are to win this debate."
+
+    # Self-debate notes
+    SELF_DEBATE_NOTE = "\nRemember that you are debating yourself, a model with the same competence as you have."
+    INFORMED_SELF_DEBATE_NOTE = "\nRemember that you are debating yourself, a model with the same competence as you have. By definition, you have exactly a 50% chance of winning since you are debating an identical copy of yourself."
+
+    # Token betting explanation
+    TOKEN_BETTING_RULES = "\nYou will get the amount that you, and your opponent will bet if you win. If you lose, you'll lose this amount and it will go to your opponent. You start off with a 100 tokens in this debate."
+
+    # Bet logic instructions
+    STANDARD_BET_LOGIC = "In xml tags <{bet_logic_tag}></{bet_logic_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. Be reflective and after that give me a bet amount. Your thoughts are private and won't be read by the other side"
+
+    REDTEAM_BET_LOGIC = "In xml tags <{bet_logic_tag}></{bet_logic_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. I want you to specifically consider a case of why you might win. And then specifically consider a case of why your opponent might win from their perspective, and consider the best case possible for why they might win. Then, put all of this in your <{bet_logic_tag}></{bet_logic_tag}>"
+
+    # Bet format instruction
+    BET_FORMAT = "\nUse the format <{bet_amount_tag}>NUMBER</{bet_amount_tag}> at the end of your speech."
+
+    # Task header
+    TASK_HEADER = "=== YOUR TASK ===\nYou are on the {side} side.\nYou must now give your {speech_type} speech."
+
+
+@dataclass
+class DebateTypeConfig:
+    """Configuration for a specific debate type."""
+    is_public: bool
+    requires_betting: bool
+    instruction_keys: List[str]  # Keys from DebateInstructions to include
+
+    @property
+    def bet_visibility(self) -> str:
+        """Get the bet visibility text for this debate type."""
+        return "public (visible to your opponent)" if self.is_public else "private (not visible to your opponent)"
+
+
+# Configuration mapping for each debate type
+DEBATE_TYPE_CONFIGS = {
+    DebateType.BASELINE: DebateTypeConfig(
+        is_public=False,
+        requires_betting=False,
+        instruction_keys=["TASK_HEADER"]
+    ),
+    DebateType.PRIVATE_BET: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.PUBLIC_BET: DebateTypeConfig(
+        is_public=True,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.PRIVATE_SAME_DEBATOR: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.SAME_DEBATOR: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.PUBLIC_SAME_DEBATOR: DebateTypeConfig(
+        is_public=True,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.PRIVATE_SAME_DEBATOR_INFORMED: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "INFORMED_SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+    DebateType.SELF_REDTEAM_DEBATE: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "REDTEAM_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+}
+
 class Round:
     def __init__(self, side: Side, speech_type: SpeechType):
         self.side = side
