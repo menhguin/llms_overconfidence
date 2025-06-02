@@ -5,7 +5,7 @@ import time
 import logging
 import yaml
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 from dotenv import load_dotenv
 import requests
 from itertools import cycle
@@ -220,7 +220,6 @@ def get_system_prompt(side: str, speech_type: str, prompts: DebatePrompts, round
    elif speech_type == "closing":
        return f"You are on the {side} side. {prompts.final_speech_prompt}"
    elif speech_type.startswith("rebuttal"):
-       round_info = f" (round {round_num})" if round_num is not None else ""
        return f"You are on the {side} side. {prompts.rebuttal_speech_prompt}"
    else:
        raise ValueError(f"Unknown speech type: {speech_type}")

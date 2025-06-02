@@ -51,7 +51,7 @@ class DebateService:
         self.logger.warning(
             f"Could not extract bet from {model} for {round.side.value} {round.speech_type.value}"
         )
-        self.logger.info(f"Speech content: {speech_text}... (truncated)")
+        self.logger.info(f"Speech content: {speech_text})")
 
         while True:
             try:

@@ -5,6 +5,7 @@ import statistics
 import pandas as pd
 
 from src.core.models import DebateTotal, Side, SpeechType
+from src.scripts.create_csv import get_experiment_names, base_dir, experiment_dirs
 
 
 def load_debate_totals(directory_path: str) -> List[DebateTotal]:
@@ -22,17 +23,6 @@ def load_debate_totals(directory_path: str) -> List[DebateTotal]:
     return debate_totals
 
 
-def get_experiment_names() -> Dict[str, str]:
-    """
-    Returns a mapping from directory names to formatted experiment names.
-    """
-    return {
-        "private_bet_experiments_diff_models": "Cross-model",
-        "private_self_bet": "Debate against same model",
-        "private_self_bet_anchored": "Debate against same model informed with 50% probability",
-        "public_bets": "Public Bets",
-        "SELF_REDTEAM_DEBATE": "Redteam"
-    }
 
 
 def get_initial_confidences(debate_total: DebateTotal) -> List[Dict]:
@@ -66,14 +56,7 @@ def analyze_confidences_with_stats():
     Analyze initial confidence means and standard deviations by model for each experiment type.
     Include sample size in the output. Add overall average row for each experiment.
     """
-    base_dir = "experiments"  # Updated base directory path
-    experiment_dirs = {
-        "private_bet_experiments_diff_models",
-        "private_self_bet",
-        "private_self_bet_anchored",
-        "public_bets",
-        "SELF_REDTEAM_DEBATE"
-    }
+
 
     experiment_names = get_experiment_names()
     all_confidences = []

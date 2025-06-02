@@ -167,7 +167,7 @@ class MessageFormatter:
 
             if instruction_key == "BET_REQUIREMENT":
                 task_parts.append(template.format(visibility=config.bet_visibility))
-            elif instruction_key in ["STANDARD_BET_LOGIC", "REDTEAM_BET_LOGIC"]:
+            elif instruction_key in ["STANDARD_BET_LOGIC", "REDTEAM_BET_LOGIC", "REDTEAM_V2"]:
                 task_parts.append(template.format(bet_logic_tag=self.bet_pattern_config.bet_logic_private_xml_tag))
             elif instruction_key == "BET_FORMAT":
                 task_parts.append(template.format(bet_amount_tag=self.bet_pattern_config.bet_amount_xml_tag))

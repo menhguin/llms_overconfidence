@@ -1,7 +1,6 @@
 import os
 import json
 from pathlib import Path
-from typing import Dict, Any, Set
 
 from src.core.models import DebateTotal
 
@@ -200,7 +199,7 @@ def analyze_token_usage_and_cost():
               f"{', '.join(grand_totals['unknown_cost_models'])}")
 
     print("-" * 100)
-    print(f"Results saved to model_token_usage_and_cost.json")
+    print("Results saved to model_token_usage_and_cost.json")
 
     return output
 

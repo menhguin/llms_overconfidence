@@ -5,6 +5,17 @@ from typing import List, Dict
 
 from src.core.models import DebateTotal, Side
 
+base_dir = "experiments"
+experiment_dirs = {
+        "private_bet_experiments_diff_models",
+        "private_self_bet",
+        "private_self_bet_anchored",
+        "public_bets",
+        "SELF_REDTEAM_DEBATE",
+        "deceptive_self_debate",
+        "redteam_v2"
+    }
+
 
 def load_debate_totals(directory_path: str) -> List[DebateTotal]:
     """
@@ -30,7 +41,9 @@ def get_experiment_names() -> Dict[str, str]:
         "private_self_bet": "self_debate",
         "private_self_bet_anchored": "informed_self",
         "public_bets": "public_bets",
-        "SELF_REDTEAM_DEBATE": "self_redteam_debate"
+        "SELF_REDTEAM_DEBATE": "self_redteam_debate",
+        "redteam_v2": "redteam_v2",
+        "deceptive_self_debate": "deceptive_self_debate"
     }
 
 
@@ -46,14 +59,6 @@ def create_bet_dataset():
     """
     Process all debate files and create a comprehensive dataset of all bets.
     """
-    base_dir = "experiments"
-    experiment_dirs = {
-        "private_bet_experiments_diff_models",
-        "private_self_bet",
-        "private_self_bet_anchored",
-        "public_bets",
-        "SELF_REDTEAM_DEBATE"
-    }
 
     experiment_names = get_experiment_names()
     all_bets = []

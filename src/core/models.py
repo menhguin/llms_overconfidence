@@ -21,6 +21,9 @@ class DebateType(Enum):
     PUBLIC_SAME_DEBATOR = "PUBLIC_SAME_DEBATOR"
     PRIVATE_SAME_DEBATOR_INFORMED = "private_same_debator_informed"
     SELF_REDTEAM_DEBATE = "readteam_debate"
+    DECEPTIVE_SELF_DEBATE = "deceptive_self_debate"
+    REDTEAM_V2 = "redteam_v2"
+
 
 
 class Side(Enum):
@@ -51,6 +54,11 @@ class DebateInstructions:
     STANDARD_BET_LOGIC = "In xml tags <{bet_logic_tag}></{bet_logic_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. Be reflective and after that give me a bet amount. Your thoughts are private and won't be read by the other side"
 
     REDTEAM_BET_LOGIC = "In xml tags <{bet_logic_tag}></{bet_logic_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. I want you to specifically consider a case of why you might win. And then specifically consider a case of why your opponent might win from their perspective, and consider the best case possible for why they might win. Then, put all of this in your <{bet_logic_tag}></{bet_logic_tag}>"
+
+    CONFIDENT_OPPONENT_NOTE = "\nNOTE: You are debating against an extremely confident and skillful opponent who is known for their strong argumentation abilities. They will likely present compelling arguments, so you'll need to be at your absolute best to win this debate."
+
+    REDTEAM_V2 = "\n In xml tags <{bet_logic_tag}></{bet_logic_tag}> explain whether and to what extent you think you are going to win this debate compared to the other side based on the juding criterion. I want you to also specifically consider what a third party might say about you winning the debate. Combine both your own perception and what a third party might say and then put all of it in your xml. Then, put all of this in your <{bet_logic_tag}></{bet_logic_tag}>"
+
 
     # Bet format instruction
     BET_FORMAT = "\nUse the format <{bet_amount_tag}>NUMBER</{bet_amount_tag}> at the end of your speech."
@@ -114,6 +122,18 @@ DEBATE_TYPE_CONFIGS = {
         requires_betting=True,
         instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "REDTEAM_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
     ),
+    DebateType.DECEPTIVE_SELF_DEBATE: DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "CONFIDENT_OPPONENT_NOTE", "TOKEN_BETTING_RULES", "STANDARD_BET_LOGIC", "BET_FORMAT", "TASK_HEADER"]
+    ),
+
+    DebateType.REDTEAM_V2 : DebateTypeConfig(
+        is_public=False,
+        requires_betting=True,
+        instruction_keys=["BET_REQUIREMENT", "SELF_DEBATE_NOTE", "TOKEN_BETTING_RULES", "REDTEAM_V2", "BET_FORMAT", "TASK_HEADER"]
+    ),
+
 }
 
 class Round:
